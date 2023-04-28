@@ -5,10 +5,11 @@ States of the  API routes.
 
 from api.v1.views import app_views
 from flask import jsonify, abort, request
-from models import storage, State
+from models import storage
+from models.state import State
 
 
-@app_views.route('/states', methods=['GET'])
+@app_views.route('/states', methods=['GET'], strict_slashes=False)
 def get_states():
     """Retrieves the list of all State objects."""
     states = storage.all(State).values()
