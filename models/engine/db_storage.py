@@ -4,6 +4,7 @@ contains the class DBStorage
 """
 
 import models
+import hashlib
 from models.amenity import Amenity
 from models.base_model import BaseModel, Base
 from models.city import City
@@ -15,7 +16,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-# this helps incase you use a .env file
+# this helps in case you use a .env file
 try:
     from decouple import config as getenv
 except ImportError:
@@ -29,7 +30,7 @@ class DBStorage:
     """interaacts with the MySQL database"""
     __engine = None
     __session = None
-
+    
     def __init__(self):
         """Instantiate a DBStorage object"""
         HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
@@ -54,10 +55,12 @@ class DBStorage:
                 for obj in objs:
                     key = obj.__class__.__name__ + '.' + obj.id
                     new_dict[key] = obj
-        return (new_dict)
+        return new_dict
 
     def new(self, obj):
         """add the object to the current database session"""
+        if isinstance(obj, User):
+            obj.password = hashlib.md5(obj.password.encode()).hexdigest()
         self.__session.add(obj)
 
     def save(self):
@@ -99,15 +102,5 @@ class DBStorage:
     def count(self, cls=None):
         """
         Returns the number of objects in storage matching the given class ,
-        If no class is passed, returns the count of all objects in storage.
+        If no class is passed, returns the count
         """
-        all_class = classes.values()
-
-        if not cls:
-            count = 0
-            for item in all_class:
-                count += len(models.storage.all(item).values())
-        else:
-            count = len(models.storage.all(cls).values())
-
-        return count

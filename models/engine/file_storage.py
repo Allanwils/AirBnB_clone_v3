@@ -12,6 +12,7 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
+import hashlib
 
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
@@ -42,12 +43,14 @@ class FileStorage:
             self.__objects[key] = obj
 
     def save(self):
-        """serializes __objects to the JSON file (path: __file_path)"""
-        json_objects = {}
-        for key in self.__objects:
-            json_objects[key] = self.__objects[key].to_dict()
-        with open(self.__file_path, 'w') as f:
-            json.dump(json_objects, f)
+        new_dict = {}
+        for key, value in self.__objects.items():
+            if key.split('.')[0] == "User":
+                password = hashlib.md5(value.password.encode('utf-8')).hexdigest()
+                value.password = password
+            new_dict[key] = value.to_dict()
+        with open(self.__file_path, mode='w', encoding='utf-8') as f:
+            json.dump(new_dict, f)
 
     def reload(self):
         """deserializes the JSON file to __objects"""
