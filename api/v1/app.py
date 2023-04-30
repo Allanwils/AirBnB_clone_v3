@@ -14,6 +14,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 # Create CORS instance
 cors = CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
 
+
 @app.teardown_appcontext
 def close_session(exception=None):
     '''Close storage on teardown'''
